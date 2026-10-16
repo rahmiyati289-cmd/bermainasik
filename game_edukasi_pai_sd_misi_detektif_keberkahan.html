@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi Detektif Keberkahan: Teladan Sang Murid</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Fredoka & Nunito for friendly kid design -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelGreen: '#A8E6CF',
+                        pastelMint: '#DCEDC8',
+                        pastelBlue: '#A0E7E5',
+                        pastelPurple: '#D7BDE2',
+                        pastelPink: '#FF8B94',
+                        pastelYellow: '#FFF59D',
+                        brandDark: '#2C3E50',
+                    },
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #E0F2FE 0%, #F3E8FF 50%, #DCFCE7 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Custom Bounce and Pulse Animations */
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-bounce-gentle {
+            animation: gentle-bounce 2s infinite;
+        }
+
+        /* Card styles and hover effects */
+        .card-interactive {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .card-interactive:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        .card-interactive:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        /* Selected State */
+        .selected-card {
+            border: 4px solid #3B82F6 !important;
+            background-color: #EFF6FF !important;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .correct-flash {
+            animation: flashGreen 0.6s ease;
+        }
+        .wrong-flash {
+            animation: flashRed 0.6s ease;
+        }
+
+        @keyframes flashGreen {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(74, 222, 128, 0.4); }
+        }
+        @keyframes flashRed {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(248, 113, 113, 0.4); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93C5FD;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 antialiased overflow-x-hidden">
+
+    <header class="w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-purple-100 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white text-xl shadow-md">
+                    🔍
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-heading font-bold text-indigo-900 leading-tight">Misi Detektif Keberkahan</h1>
+                    <p class="text-xs text-purple-600 font-semibold">PAI SD Kelas III - Teladan Sang Murid</p>
+                </div>
+            </div>
+
+            <!-- Score & Audio Bar -->
+            <div class="flex items-center space-x-3">
+                <div id="scoreBadge" class="hidden bg-amber-100 border border-amber-300 text-amber-800 px-3 py-1 rounded-full font-bold text-sm flex items-center shadow-sm">
+                    ⭐ <span id="currentScore" class="ml-1 text-base">0</span>
+                </div>
+                <button id="audioToggleBtn" onclick="toggleAudio()" class="w-9 h-9 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition">
+                    <i id="audioIcon" class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- SCREEN 0: MENU UTAMA -->
+        <section id="screenMenu" class="bg-white/90 backdrop-blur-md rounded-3xl p-6 md:p-10 shadow-xl border-4 border-purple-200 text-center relative overflow-hidden my-auto">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-200 rounded-full opacity-50 blur-2xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-200 rounded-full opacity-50 blur-2xl"></div>
+
+            <div class="relative z-10">
+                <div class="inline-block p-4 bg-purple-100 rounded-full mb-4 animate-bounce-gentle">
+                    <span class="text-6xl">🕵️‍♂️🏻‍🏫</span>
+                </div>
+                <h2 class="text-2xl md:text-4xl font-heading font-extrabold text-indigo-900 mb-3">
+                    Misi Detektif Keberkahan:<br><span class="text-purple-600">Teladan Sang Murid</span>
+                </h2>
+                <p class="text-slate-600 max-w-lg mx-auto text-sm md:text-base mb-6">
+                    Ayo Bantu Detektif Cilik menyelesaikan 4 Misi Keberkahan untuk meneladani sikap hormat dan bakti kepada Guru!
+                </p>
+
+                <!-- Information Card -->
+                <div class="bg-gradient-to-r from-sky-50 to-indigo-50 rounded-2xl p-4 border border-sky-200 text-left mb-8 max-w-md mx-auto shadow-inner text-xs md:text-sm">
+                    <div class="font-bold text-indigo-900 mb-2 flex items-center">
+                        <i class="fas fa-scroll text-indigo-500 mr-2"></i> Petunjuk Misi Detektif:
+                    </div>
+                    <ul class="space-y-1 text-slate-700">
+                        <li>🎯 <strong>Stage 1:</strong> Jodohkan Kisah Teladan Ulama.</li>
+                        <li>🎯 <strong>Stage 2:</strong> Sortir Hikmah vs Akibat.</li>
+                        <li>🎯 <strong>Stage 3:</strong> Tentukan Sikap Terpuji.</li>
+                        <li>🎯 <strong>Stage 4:</strong> Jawab Percakapan Dialog Santun.</li>
+                    </ul>
+                </div>
+
+                <button onclick="startGame()" class="bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-500 hover:to-emerald-600 text-white font-heading font-bold text-lg md:text-xl px-8 py-4 rounded-2xl shadow-lg hover:shadow-emerald-200/50 transform hover:-translate-y-1 transition duration-200 flex items-center justify-center mx-auto space-x-2">
+                    <span>Mulai Bermain</span>
+                    <i class="fas fa-play text-sm"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 1: STAGE 1 (JODOHKAN PASANGAN) -->
+        <section id="screenStage1" class="hidden bg-white/90 backdrop-blur-md rounded-3xl p-5 md:p-8 shadow-xl border-4 border-sky-200">
+            <!-- Stage Header -->
+            <div class="flex items-center justify-between border-b pb-4 mb-6">
+                <div>
+                    <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Stage 1 dari 4</span>
+                    <h3 class="text-xl md:text-2xl font-heading font-bold text-sky-900 mt-1">Jejak Teladan Ulama 📖</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Kemajuan</span>
+                    <span class="font-bold text-purple-600">25%</span>
+                </div>
+            </div>
+
+            <p class="text-slate-600 text-sm md:text-base mb-6">
+                Pasangkanlah sosok Ulama Teladan dengan bentuk rasa bakti dan hormat kepada gurunya secara tepat!
+            </p>
+
+            <!-- Matching Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Column Left: Tokoh Ulama -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-700 text-sm uppercase tracking-wider flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 mr-2"></span> 1. Pilih Ulama:
+                    </h4>
+                    
+                    <div id="ulama-syafii" onclick="selectUlama('syafii')" class="card-interactive bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm hover:border-sky-400 flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-2xl">👳‍♂️</div>
+                        <div>
+                            <div class="font-bold text-slate-800">Imam Syafi'i</div>
+                            <div class="text-xs text-slate-500">Murid dari Imam Malik</div>
+                        </div>
+                    </div>
+
+                    <div id="ulama-ahmad" onclick="selectUlama('ahmad')" class="card-interactive bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm hover:border-sky-400 flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-2xl">👳‍♂️</div>
+                        <div>
+                            <div class="font-bold text-slate-800">Imam Ahmad bin Hambal</div>
+                            <div class="text-xs text-slate-500">Murid dari Imam Syafi'i</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column Right: Perilaku Bakti -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-700 text-sm uppercase tracking-wider flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> 2. Pasangkan Perilaku Baktinya:
+                    </h4>
+
+                    <div id="action-doa" onclick="selectAction('doa')" class="card-interactive bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm hover:border-emerald-400 flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex-shrink-0 flex items-center justify-center text-xl mt-1">🤲</div>
+                        <div class="text-xs md:text-sm text-slate-700 leading-snug">
+                            Selalu berdoa memohon ampunan, kemuliaan, dan keridaan ilmu untuk gurunya setiap waktu.
+                        </div>
+                    </div>
+
+                    <div id="action-kertas" onclick="selectAction('kertas')" class="card-interactive bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm hover:border-emerald-400 flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 flex-shrink-0 flex items-center justify-center text-xl mt-1">📄</div>
+                        <div class="text-xs md:text-sm text-slate-700 leading-snug">
+                            Membuka lembaran kertas buku dengan perlahan & sangat hati-hati agar tidak terdengar gurunya.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Indicator -->
+            <div id="stage1Feedback" class="min-h-[40px] text-center font-bold text-sm text-purple-700 flex items-center justify-center">
+                Pilih satu Ulama di kiri, lalu pilih tindakan yang sesuai di kanan!
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="mt-6 flex justify-end">
+                <button id="btnNextStage1" onclick="nextStage(2)" disabled class="bg-slate-300 text-slate-500 font-bold px-6 py-3 rounded-xl cursor-not-allowed transition">
+                    Lanjut ke Stage 2 <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: STAGE 2 (SORTIR KARTU / CATEGORIZATION) -->
+        <section id="screenStage2" class="hidden bg-white/90 backdrop-blur-md rounded-3xl p-5 md:p-8 shadow-xl border-4 border-purple-200">
+            <div class="flex items-center justify-between border-b pb-4 mb-4">
+                <div>
+                    <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Stage 2 dari 4</span>
+                    <h3 class="text-xl md:text-2xl font-heading font-bold text-purple-900 mt-1">Pintu Keberkahan vs Penyesalan 🚪</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Kemajuan</span>
+                    <span class="font-bold text-purple-600">50%</span>
+                </div>
+            </div>
+
+            <p class="text-slate-600 text-sm mb-4">
+                Pilih kartu di bawah ini, lalu masukkan ke dalam pintu kategori yang tepat!
+            </p>
+
+            <!-- Current Active Card Container -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-2xl border-2 border-dashed border-purple-300 text-center mb-6 min-h-[110px] flex flex-col justify-center items-center shadow-inner">
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-500 mb-1">Kartu Yang Harus Disortir:</span>
+                <div id="currentSortCard" class="font-heading font-bold text-lg md:text-xl text-indigo-900 px-4 py-2 bg-white rounded-xl shadow border border-purple-100 animate-pulse">
+                    Memuat kartu...
+                </div>
+                <span id="sortProgressText" class="text-xs text-slate-500 mt-2">Sisa kartu: 0</span>
+            </div>
+
+            <!-- Target Drop Bins / Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <button onclick="sortCurrentCard('hikmah')" class="group p-5 bg-gradient-to-b from-emerald-50 to-teal-100 hover:from-emerald-100 hover:to-teal-200 border-2 border-emerald-300 rounded-2xl text-center transition flex flex-col items-center justify-center shadow-sm hover:shadow-md">
+                    <div class="text-4xl mb-2 group-hover:scale-110 transition duration-200">✨🚪</div>
+                    <span class="font-heading font-bold text-emerald-900 text-base md:text-lg">Hikmah Berbakti</span>
+                    <span class="text-xs text-emerald-700">Dampak baik menghormati guru</span>
+                </button>
+
+                <button onclick="sortCurrentCard('akibat')" class="group p-5 bg-gradient-to-b from-rose-50 to-amber-100 hover:from-rose-100 hover:to-amber-200 border-2 border-rose-300 rounded-2xl text-center transition flex flex-col items-center justify-center shadow-sm hover:shadow-md">
+                    <div class="text-4xl mb-2 group-hover:scale-110 transition duration-200">⚠️🚪</div>
+                    <span class="font-heading font-bold text-rose-900 text-base md:text-lg">Akibat Tidak Berbakti</span>
+                    <span class="text-xs text-rose-700">Kerugian tidak santun pada guru</span>
+                </button>
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="flex justify-end">
+                <button id="btnNextStage2" onclick="nextStage(3)" disabled class="bg-slate-300 text-slate-500 font-bold px-6 py-3 rounded-xl cursor-not-allowed transition">
+                    Lanjut ke Stage 3 <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: STAGE 3 (DETEKTIF SIKAP - YA/TIDAK) -->
+        <section id="screenStage3" class="hidden bg-white/90 backdrop-blur-md rounded-3xl p-5 md:p-8 shadow-xl border-4 border-emerald-200">
+            <div class="flex items-center justify-between border-b pb-4 mb-4">
+                <div>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Stage 3 dari 4</span>
+                    <h3 class="text-xl md:text-2xl font-heading font-bold text-emerald-900 mt-1">Detektif Sikap Terpuji 🔍</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Kemajuan</span>
+                    <span class="font-bold text-purple-600">75%</span>
+                </div>
+            </div>
+
+            <p class="text-slate-600 text-sm mb-6">
+                Bantu Detektif menilai pernyataan sikap di bawah ini. Apakah perilaku tersebut terpuji (**Ya**) atau tidak terpuji (**Tidak**)?
+            </p>
+
+            <!-- Card Quiz Container -->
+            <div class="bg-emerald-50/60 rounded-2xl p-6 border-2 border-emerald-200 mb-6 text-center relative">
+                <div class="text-xs font-bold text-emerald-600 uppercase mb-2">Soal <span id="s3Index">1</span> dari <span id="s3Total">4</span></div>
+                <div id="s3QuestionText" class="text-lg md:text-xl font-bold text-slate-800 min-h-[60px] flex items-center justify-center">
+                    "Aku mengucapkan salam ketika bertemu guru"
+                </div>
+            </div>
+
+            <!-- Option Buttons -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button onclick="answerStage3(true)" class="p-4 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl font-heading font-bold text-xl shadow-lg shadow-emerald-200 transition flex items-center justify-center space-x-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Ya (Terpuji)</span>
+                </button>
+
+                <button onclick="answerStage3(false)" class="p-4 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white rounded-2xl font-heading font-bold text-xl shadow-lg shadow-rose-200 transition flex items-center justify-center space-x-2">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Tidak</span>
+                </button>
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="flex justify-end">
+                <button id="btnNextStage3" onclick="nextStage(4)" disabled class="bg-slate-300 text-slate-500 font-bold px-6 py-3 rounded-xl cursor-not-allowed transition">
+                    Lanjut ke Stage 4 <i class="fas fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: STAGE 4 (DIALOG SANTUN - MULTIPLE CHOICE) -->
+        <section id="screenStage4" class="hidden bg-white/90 backdrop-blur-md rounded-3xl p-5 md:p-8 shadow-xl border-4 border-amber-200">
+            <div class="flex items-center justify-between border-b pb-4 mb-4">
+                <div>
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Stage 4 dari 4</span>
+                    <h3 class="text-xl md:text-2xl font-heading font-bold text-amber-900 mt-1">Dialog Santun Cilik 💬</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Kemajuan</span>
+                    <span class="font-bold text-purple-600">100%</span>
+                </div>
+            </div>
+
+            <!-- Dialogue Visual Box -->
+            <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 mb-6 flex flex-col md:flex-row items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-amber-200 flex items-center justify-center text-3xl flex-shrink-0">
+                    👨‍🏫
+                </div>
+                <div class="flex-grow">
+                    <div class="text-xs font-bold text-amber-800 uppercase mb-1">Situasi Percakapan:</div>
+                    <div id="s4Situation" class="text-sm md:text-base text-slate-800 font-semibold">
+                        Kamu bertemu dengan Bapak Guru di depan ruang guru saat pagi hari...
+                    </div>
+                </div>
+            </div>
+
+            <div class="font-bold text-slate-700 text-sm mb-3">Apa ucapan atau tindakan paling santun yang harus kamu lakukan?</div>
+
+            <!-- Choice List -->
+            <div id="s4Choices" class="space-y-3 mb-6">
+                <!-- Injected dynamically via JS -->
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="flex justify-end">
+                <button id="btnFinishGame" onclick="showReportScreen()" disabled class="bg-slate-300 text-slate-500 font-bold px-6 py-3 rounded-xl cursor-not-allowed transition">
+                    Lihat Laporan Detektif 🎉
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: LAPORAN AKHIR & LENCANA (RESULTS) -->
+        <section id="screenReport" class="hidden bg-white/95 backdrop-blur-md rounded-3xl p-6 md:p-10 shadow-2xl border-4 border-amber-300 text-center relative overflow-hidden my-auto">
+            <div class="inline-block p-4 bg-amber-100 rounded-full mb-3 animate-bounce-gentle">
+                <span id="badgeEmoji" class="text-6xl">🏆</span>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-heading font-extrabold text-amber-900 mb-1">
+                Laporan Detektif Cilik!
+            </h2>
+            <p class="text-xs md:text-sm text-slate-600 mb-4">Selamat! Kamu telah menyelesaikan semua Misi Keberkahan Ilmu.</p>
+
+            <!-- Stars display -->
+            <div id="starContainer" class="flex justify-center space-x-2 text-4xl text-amber-400 mb-4">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 rounded-2xl p-5 border border-amber-200 max-w-md mx-auto mb-6 shadow-sm">
+                <div class="text-xs text-amber-800 font-bold uppercase tracking-wider mb-1">Skor Akhir Kamu</div>
+                <div id="finalScoreText" class="text-4xl md:text-5xl font-heading font-extrabold text-amber-600 mb-2">100</div>
+                <div id="badgeTitle" class="inline-block bg-amber-500 text-white font-bold text-sm px-4 py-1.5 rounded-full shadow-sm mb-2">
+                    🎖️ Siswa Teladan Keberkahan
+                </div>
+                <p id="finalFeedback" class="text-xs md:text-sm text-slate-700 mt-2">
+                    Luar biasa! Kamu sangat memahami pentingnya rasa hormat dan bakti kepada Guru!
+                </p>
+            </div>
+
+            <!-- Janji Murid Berbakti Box -->
+            <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 max-w-md mx-auto text-left mb-6">
+                <div class="font-heading font-bold text-emerald-900 text-center text-sm mb-2 flex items-center justify-center">
+                    <i class="fas fa-heart text-rose-500 mr-2"></i> Janji Murid Berbakti
+                </div>
+                <p class="text-xs md:text-sm text-emerald-800 italic text-center">
+                    "Aku berjanji akan selalu menyapa dengan salam, mendengarkan nasihat, dan mendoakan kebaikan bagi bapak dan ibu guruku setiap hari."
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+                <button onclick="resetGame()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-heading font-bold text-base px-6 py-3 rounded-2xl shadow-md transition flex items-center justify-center space-x-2">
+                    <i class="fas fa-redo"></i>
+                    <span>Main Lagi</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="w-full text-center py-3 text-xs text-slate-500 bg-white/50 border-t border-slate-200/50">
+        Materi Pendidikan Agama Islam & Budi Pekerti SD Kelas III • Media Pembelajaran Interaktif
+    </footer>
+
+    <script>
+        /* --- AUDIO SYNTHESIS USING WEB AUDIO API --- */
+        let audioCtx = null;
+        let isAudioMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isAudioMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'correct') {
+                // Happy chord chime
+                [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.3);
+                });
+            } else if (type === 'wrong') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'win') {
+                // Fanfare melody
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.3, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.4);
+                });
+            }
+        }
+
+        function toggleAudio() {
+            isAudioMuted = !isAudioMuted;
+            const icon = document.getElementById('audioIcon');
+            if (isAudioMuted) {
+                icon.className = 'fas fa-volume-mute text-slate-400';
+            } else {
+                icon.className = 'fas fa-volume-up text-indigo-600';
+                playSound('click');
+            }
+        }
+
+        /* --- GAME STATE VARIABLES --- */
+        let score = 0;
+
+        // Stage 1 State
+        let selectedUlama = null;
+        let stage1Matches = {
+            syafii: false,
+            ahmad: false
+        };
+
+        // Stage 2 State (Sort Cards)
+        const sortCardsData = [
+            { id: 1, text: "Memperoleh ilmu yang bermanfaat", type: "hikmah" },
+            { id: 2, text: "Merasakan kebodohan selama hidupnya", type: "akibat" },
+            { id: 3, text: "Mendapatkan kemuliaan di sisi Allah SWT", type: "hikmah" },
+            { id: 4, text: "Tumbuh menjadi pribadi yang sombong", type: "akibat" },
+            { id: 5, text: "Keridaan guru merupakan kunci sukses", type: "hikmah" },
+            { id: 6, text: "Tidak mendapat keberkahan dari ilmu", type: "akibat" },
+            { id: 7, text: "Bernilai ibadah dan pahala", type: "hikmah" }
+        ];
+        let currentSortIndex = 0;
+
+        // Stage 3 State (Sikap Ya/Tidak)
+        const stage3Questions = [
+            { text: "Aku mengucapkan salam ketika bertemu guru.", answer: true },
+            { text: "Aku mendoakan kebaikan untuk guru.", answer: true },
+            { text: "Aku senang mengganggu anak/keluarga ibu atau bapak guru.", answer: false },
+            { text: "Aku mendengar dan memperhatikan nasihat guru.", answer: true }
+        ];
+        let currentS3Index = 0;
+
+        // Stage 4 State (Dialog Situasi)
+        const stage4Scenarios = [
+            {
+                situation: "Kamu hendak lewat di depan guru yang sedang berdiri di selasar sekolah...",
+                choices: [
+                    { text: "Berjalan sambil membungkukkan badan dan mengucapkan 'Permisi Pak/Bu'", correct: true },
+                    { text: "Lari kencang tanpa menyapa", correct: false },
+                    { text: "Berteriak memanggil teman", correct: false }
+                ]
+            },
+            {
+                situation: "Bapak/Ibu guru telah selesai memberikan penjelasan materi di kelas...",
+                choices: [
+                    { text: "Mengabaikan penjelasan guru", correct: false },
+                    { text: "Mengucapkan 'Terima kasih Pak/Bu atas ilmunya'", correct: true },
+                    { text: "Keluar kelas sebelum jam pelajaran usai", correct: false }
+                ]
+            }
+        ];
+        let currentS4Index = 0;
+
+        /* --- NAVIGATION FUNCTIONS --- */
+        function showScreen(screenId) {
+            const screens = ['screenMenu', 'screenStage1', 'screenStage2', 'screenStage3', 'screenStage4', 'screenReport'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('currentScore').innerText = score;
+        }
+
+        function startGame() {
+            playSound('click');
+            score = 0;
+            document.getElementById('currentScore').innerText = score;
+            document.getElementById('scoreBadge').classList.remove('hidden');
+            
+            // Reset state Stage 1
+            selectedUlama = null;
+            stage1Matches = { syafii: false, ahmad: false };
+            resetStage1UI();
+
+            // Reset state Stage 2
+            currentSortIndex = 0;
+            loadSortCard();
+
+            // Reset state Stage 3
+            currentS3Index = 0;
+            loadStage3Question();
+
+            // Reset state Stage 4
+            currentS4Index = 0;
+            loadStage4Question();
+
+            showScreen('screenStage1');
+        }
+
+        function nextStage(stageNum) {
+            playSound('click');
+            if (stageNum === 2) showScreen('screenStage2');
+            else if (stageNum === 3) showScreen('screenStage3');
+            else if (stageNum === 4) showScreen('screenStage4');
+        }
+
+        /* --- STAGE 1 LOGIC (JODOHKAN ULAMA) --- */
+        function resetStage1UI() {
+            ['ulama-syafii', 'ulama-ahmad'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('selected-card', 'opacity-50', 'pointer-events-none');
+            });
+            ['action-doa', 'action-kertas'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('selected-card', 'opacity-50', 'pointer-events-none');
+            });
+            document.getElementById('stage1Feedback').innerHTML = 'Pilih satu Ulama di kiri, lalu pilih tindakan yang sesuai di kanan!';
+            document.getElementById('btnNextStage1').disabled = true;
+            document.getElementById('btnNextStage1').className = "bg-slate-300 text-slate-500 font-bold px-6 py-3 rounded-xl cursor-not-allowed transition";
+        }
+
+        function selectUlama(ulamaKey) {
+            if (stage1Matches[ulamaKey]) return;
+            playSound('click');
+            selectedUlama = ulamaKey;
+
+            document.getElementById('ulama-syafii').classList.toggle('selected-card', ulamaKey === 'syafii');
+            document.getElementById('ulama-ahmad').classList.toggle('selected-card', ulamaKey === 'ahmad');
+
+            document.getElementById('stage1Feedback').innerHTML = `Sekarang pilih tindakan rasa bakti untuk <span class="font-bold text-sky-900">${ulamaKey === 'syafii' ? "Imam Syafi'i" : "Imam Ahmad bin Hambal"}</span>!`;
+        }
+
+        function selectAction(actionKey) {
+            if (!selectedUlama) {
+                playSound('wrong');
+                document.getElementById('stage1Feedback').innerHTML = '<span class="text-rose-600 font-bold">Pilih tokoh Ulama di sebelah kiri terlebih dahulu!</span>';
+                return;
+            }
+
+            let isCorrect = false;
+            if (selectedUlama === 'syafii' && actionKey === 'kertas') isCorrect = true;
+            if (selectedUlama === 'ahmad' && actionKey === 'doa') isCorrect = true;
+
+            if (isCorrect) {
+                playSound('correct');
+                updateScore(15);
+                stage1Matches[selectedUlama] = true;
+
+                // Disable matched cards
+                document.getElementById(`ulama-${selectedUlama}`).classList.remove('selected-card');
+                document.getElementById(`ulama-${selectedUlama}`).classList.add('opacity-50', 'pointer-events-none', 'bg-emerald-50');
+                document.getElementById(`action-${actionKey}`).classList.add('opacity-50', 'pointer-events-none', 'bg-emerald-50');
+
+                selectedUlama = null;
+
+                if (stage1Matches.syafii && stage1Matches.ahmad) {
+                    document.getElementById('stage1Feedback').innerHTML = '<span class="text-emerald-600 font-bold text-base">🎉 Hebat! Semua pasangan Ulama Teladan berhasil cocok!</span>';
+                    const btn = document.getElementById('btnNextStage1');
+                    btn.disabled = false;
+                    btn.className = "bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5";
+                } else {
+                    document.getElementById('stage1Feedback').innerHTML = '<span class="text-emerald-600 font-bold">Benar! 👍 Sekarang pasangkan Ulama berikutnya!</span>';
+                }
+            } else {
+                playSound('wrong');
+                document.getElementById('stage1Feedback').innerHTML = '<span class="text-rose-600 font-bold">Kurang tepat! Yuk coba pikirkan tindakan yang benar!</span>';
+            }
+        }
+
+        /* --- STAGE 2 LOGIC (SORTIR KARTU) --- */
+        function loadSortCard() {
+            if (currentSortIndex < sortCardsData.length) {
+                const item = sortCardsData[currentSortIndex];
+                document.getElementById('currentSortCard').innerText = `"${item.text}"`;
+                document.getElementById('sortProgressText').innerText = `Kartu ${currentSortIndex + 1} dari ${sortCardsData.length}`;
+            } else {
+                // All sorted
+                document.getElementById('currentSortCard').innerHTML = `<span class="text-emerald-600">Selesai! ✨ Semua kartu telah disortir!</span>`;
+                document.getElementById('sortProgressText').innerText = `0 kartu tersisa`;
+                const btn = document.getElementById('btnNextStage2');
+                btn.disabled = false;
+                btn.className = "bg-purple-600 hover:bg-purple-700 text-white font-heading font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5";
+            }
+        }
+
+        function sortCurrentCard(userChoice) {
+            if (currentSortIndex >= sortCardsData.length) return;
+
+            const item = sortCardsData[currentSortIndex];
+            if (item.type === userChoice) {
+                playSound('correct');
+                updateScore(10);
+                document.getElementById('screenStage2').classList.add('correct-flash');
+                setTimeout(() => document.getElementById('screenStage2').classList.remove('correct-flash'), 600);
+            } else {
+                playSound('wrong');
+                document.getElementById('screenStage2').classList.add('wrong-flash');
+                setTimeout(() => document.getElementById('screenStage2').classList.remove('wrong-flash'), 600);
+            }
+
+            currentSortIndex++;
+            loadSortCard();
+        }
+
+        /* --- STAGE 3 LOGIC (DETEKTIF SIKAP - YA/TIDAK) --- */
+        function loadStage3Question() {
+            if (currentS3Index < stage3Questions.length) {
+                const q = stage3Questions[currentS3Index];
+                document.getElementById('s3Index').innerText = currentS3Index + 1;
+                document.getElementById('s3Total').innerText = stage3Questions.length;
+                document.getElementById('s3QuestionText').innerText = `"${q.text}"`;
+            } else {
+                document.getElementById('s3QuestionText').innerHTML = `<span class="text-emerald-600 font-bold">Hebat! Kamu telah menilai semua sikap! 🎉</span>`;
+                const btn = document.getElementById('btnNextStage3');
+                btn.disabled = false;
+                btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5";
+            }
+        }
+
+        function answerStage3(userAnswer) {
+            if (currentS3Index >= stage3Questions.length) return;
+
+            const q = stage3Questions[currentS3Index];
+            if (userAnswer === q.answer) {
+                playSound('correct');
+                updateScore(10);
+            } else {
+                playSound('wrong');
+            }
+
+            currentS3Index++;
+            loadStage3Question();
+        }
+
+        /* --- STAGE 4 LOGIC (DIALOG SANTUN) --- */
+        function loadStage4Question() {
+            if (currentS4Index < stage4Scenarios.length) {
+                const sc = stage4Scenarios[currentS4Index];
+                document.getElementById('s4Situation').innerText = sc.situation;
+
+                const choicesContainer = document.getElementById('s4Choices');
+                choicesContainer.innerHTML = '';
+
+                sc.choices.forEach((choice, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full p-4 bg-white hover:bg-amber-50 border-2 border-slate-200 hover:border-amber-400 rounded-2xl text-left font-semibold text-slate-800 transition flex items-center justify-between shadow-sm";
+                    btn.innerHTML = `<span>${choice.text}</span> <i class="fas fa-chevron-right text-slate-400"></i>`;
+                    btn.onclick = () => answerStage4(choice.correct);
+                    choicesContainer.appendChild(btn);
+                });
+            } else {
+                document.getElementById('s4Situation').innerText = "Semua tantangan dialog telah selesai dengan baik!";
+                document.getElementById('s4Choices').innerHTML = `<div class="text-center font-bold text-emerald-600 p-4 bg-emerald-50 rounded-2xl border border-emerald-200">Siap melihat Laporan Detektif Cilik! 🏆</div>`;
+                const btn = document.getElementById('btnFinishGame');
+                btn.disabled = false;
+                btn.className = "bg-amber-500 hover:bg-amber-600 text-white font-heading font-bold px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5";
+            }
+        }
+
+        function answerStage4(isCorrect) {
+            if (currentS4Index >= stage4Scenarios.length) return;
+
+            if (isCorrect) {
+                playSound('correct');
+                updateScore(15);
+            } else {
+                playSound('wrong');
+            }
+
+            currentS4Index++;
+            loadStage4Question();
+        }
+
+        /* --- FINAL REPORT & REWARD LOGIC --- */
+        function showReportScreen() {
+            playSound('win');
+            showScreen('screenReport');
+
+            document.getElementById('finalScoreText').innerText = score;
+
+            const starContainer = document.getElementById('starContainer');
+            const badgeTitle = document.getElementById('badgeTitle');
+            const finalFeedback = document.getElementById('finalFeedback');
+            const badgeEmoji = document.getElementById('badgeEmoji');
+
+            if (score >= 110) {
+                starContainer.innerHTML = `<i class="fas fa-star text-amber-400"></i><i class="fas fa-star text-amber-400"></i><i class="fas fa-star text-amber-400"></i>`;
+                badgeTitle.innerText = "🎖️ Detektif Teladan Keberkahan Utama";
+                badgeEmoji.innerText = "🏆";
+                finalFeedback.innerText = "Sempurna! Kamu telah memahami seluruh teladan, hikmah, dan adab santun kepada Guru!";
+            } else if (score >= 80) {
+                starContainer.innerHTML = `<i class="fas fa-star text-amber-400"></i><i class="fas fa-star text-amber-400"></i><i class="far fa-star text-amber-300"></i>`;
+                badgeTitle.innerText = "⭐ Bintang Adab Cilik";
+                badgeEmoji.innerText = "🌟";
+                finalFeedback.innerText = "Sangat Baik! Kamu sudah memahami pentingnya menghormati dan mendoakan Bapak/Ibu Guru.";
+            } else {
+                starContainer.innerHTML = `<i class="fas fa-star text-amber-400"></i><i class="far fa-star text-amber-300"></i><i class="far fa-star text-amber-300"></i>`;
+                badgeTitle.innerText = "🌱 Pejuang Adab Cilik";
+                badgeEmoji.innerText = "📘";
+                finalFeedback.innerText = "Bagus! Terus belajar dan praktikkan sikap santun serta bakti kepada Guru setiap hari ya!";
+            }
+        }
+
+        function resetGame() {
+            playSound('click');
+            showScreen('screenMenu');
+            document.getElementById('scoreBadge').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
